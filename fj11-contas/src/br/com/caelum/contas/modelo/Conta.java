@@ -1,6 +1,8 @@
 package br.com.caelum.contas.modelo;
 
-public abstract class Conta {
+import br.com.caelum.contas.exception.SaldoInsuficienteException;
+
+public abstract class Conta implements Comparable<Conta> {
 
 	protected double saldo;
 
@@ -11,7 +13,7 @@ public abstract class Conta {
 	private String agencia;
 
 	public abstract String getTipo();
-	
+
 	public Conta() {
 
 	}
@@ -23,13 +25,30 @@ public abstract class Conta {
 		this.saldo = saldo;
 	}
 
+	public int compareTo(Conta outraConta) {
+
+		return this.titular.compareTo(outraConta.titular);
+	}
+
 	/**
 	 * Método para Remover Valor do Saldo;
 	 * 
 	 * @param valor
 	 */
 	public void saca(double valor) {
-		this.saldo -= valor;
+
+		if (valor < 0) {
+			throw new IllegalArgumentException("Você tentou depositar " + "um valor negativo");
+		} else if (valor > this.saldo) {
+			try {
+				throw new SaldoInsuficienteException(valor);
+			} catch (SaldoInsuficienteException e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());
+			}
+		} else {
+			this.saldo -= valor;
+		}
 	}
 
 	/**
@@ -38,14 +57,27 @@ public abstract class Conta {
 	 * @param valor
 	 */
 	public void deposita(double valor) {
-		this.saldo += valor;
+		if (valor < 0) {
+			throw new IllegalArgumentException("Você tentou depositar " + "um valor negativo");
+		} else {
+			this.saldo += valor;
+		}
 	}
+
+//	public boolean equals(Object obj) {
+//		if (obj == null) {
+//			return false;
+//		}
+//
+//		Conta outraConta = (Conta) obj;
+//
+//		return this.numero == outraConta.numero && this.agencia == outraConta.agencia;
+//	}
 
 	public void transfere(double valor, Conta conta) {
 		this.saca(valor);
 		conta.deposita(valor);
 	}
-
 
 	public double getSaldo() {
 		return saldo;
